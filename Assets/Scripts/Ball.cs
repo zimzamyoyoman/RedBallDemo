@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -6,6 +7,7 @@ using UnityEngine.EventSystems;
 public class Ball : MonoBehaviour
 {
     [SerializeField] float ballSpeed = 1000f;
+    [SerializeField] float jumpSpeed = 1000f;
     [SerializeField] float touchInputForceDirection = 10f;
 
     private Touch touch;
@@ -19,7 +21,6 @@ public class Ball : MonoBehaviour
     {
         ballRigidBody = GetComponent<Rigidbody>();
         screenWidth = Screen.width;
-        addPhysicsRaycaster();
     }
 
     // Update is called once per frame
@@ -28,44 +29,34 @@ public class Ball : MonoBehaviour
         GetTouchInput();
     }
 
-    void addPhysicsRaycaster()
-    {
-        PhysicsRaycaster physicsRaycaster = FindObjectOfType<PhysicsRaycaster>();
-        if (physicsRaycaster == null)
-        {
-            Camera.main.gameObject.AddComponent<PhysicsRaycaster>();
-        }
-    }
-
     private void GetTouchInput()
     {
         if (Input.touchCount > 0)
         {
             touch = Input.GetTouch(0);
-
             switch (touch.phase)
             {
                 case TouchPhase.Began:
-
                     Ray raycast = Camera.main.ScreenPointToRay(touch.position);
                     RaycastHit raycastHit;
                     if (Physics.Raycast(raycast, out raycastHit))
                     {
                         if (raycastHit.collider.CompareTag("Ball"))
                         {
-                            Debug.Log("Ball clicked");
+                            moveBallVertically(touchInputForceDirection);
+                            ballTouched = true;
                         }
 
                         else
                         {
                             if (touch.position.x > screenWidth / 2)
                             {
-                                moveBall(touchInputForceDirection);
+                                moveBallHorizontally(touchInputForceDirection);
                             }
 
                             else if (touch.position.x < screenWidth / 2)
                             {
-                                moveBall(-touchInputForceDirection);
+                                moveBallHorizontally(-touchInputForceDirection);
                             }
                         }
                     }
@@ -73,25 +64,24 @@ public class Ball : MonoBehaviour
                     break;
 
                 case TouchPhase.Ended:
-                    ballRigidBody.velocity = Vector3.zero;
-                    ballRigidBody.angularVelocity = Vector3.zero;
+                    if (!ballTouched)
+                    {
+                        ballRigidBody.velocity = Vector3.zero;
+                        ballRigidBody.angularVelocity = Vector3.zero;
+                    }
+                    ballTouched = false;
                     break;
             }
         }
     }
 
-    private void moveBall(float touchInputForceDirection)
+    private void moveBallVertically(float touchInputForceDirection)
+    {
+        ballRigidBody.AddForce(new Vector3(0, touchInputForceDirection * jumpSpeed * Time.deltaTime, 0));
+    }
+
+    private void moveBallHorizontally(float touchInputForceDirection)
     {
         ballRigidBody.AddForce(new Vector3(touchInputForceDirection * ballSpeed * Time.deltaTime, 0, 0));
     }
-
-    /*public void OnPointerDown(PointerEventData eventData)
-    {
-        if (eventData.pointerCurrentRaycast.gameObject.name=="Ball")
-        {
-            Debug.Log("Clicked: " + eventData.pointerCurrentRaycast.gameObject.name);
-            ballTouched = true;
-        }
-
-    }*/
 }
