@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Ball : MonoBehaviour
 {
-    [SerializeField] float ballSpeed = 50f;
-    [SerializeField] float touchInputForceDirection = 1f;
+    [SerializeField] GameObject ball;
+    [SerializeField] float ballSpeed = 1000f;
+    [SerializeField] float touchInputForceDirection = 10f;
 
     private Touch touch;
     private Rigidbody ballRigidBody;
@@ -15,7 +17,7 @@ public class Ball : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        ballRigidBody = GetComponent<Rigidbody>();
+        ballRigidBody = ball.GetComponent<Rigidbody>();
         screenWidth = Screen.width;
     }
 
@@ -31,15 +33,24 @@ public class Ball : MonoBehaviour
         {
             touch = Input.GetTouch(0);
 
-            if (touch.position.x > screenWidth / 2)
+            switch (touch.phase)
             {
-                Debug.Log(screenWidth / 2);
-                moveBall(touchInputForceDirection);
-            }
+                case TouchPhase.Began:
+                    if (touch.position.x > screenWidth / 2)
+                    {
+                        moveBall(touchInputForceDirection);
+                    }
 
-            if (touch.position.x < screenWidth / 2)
-            {
-                moveBall(-touchInputForceDirection);
+                    if (touch.position.x < screenWidth / 2)
+                    {
+                        moveBall(-touchInputForceDirection);
+                    }
+                    break;
+
+                case TouchPhase.Ended:
+                    ballRigidBody.velocity = Vector3.zero;
+                    ballRigidBody.angularVelocity = Vector3.zero;
+                    break;
             }
         }
     }
