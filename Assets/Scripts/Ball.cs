@@ -5,26 +5,36 @@ using UnityEngine.EventSystems;
 
 public class Ball : MonoBehaviour
 {
-    [SerializeField] GameObject ball;
     [SerializeField] float ballSpeed = 1000f;
     [SerializeField] float touchInputForceDirection = 10f;
 
     private Touch touch;
     private Rigidbody ballRigidBody;
     private float screenWidth;
+    private bool ballTouched = false;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        ballRigidBody = ball.GetComponent<Rigidbody>();
+        ballRigidBody = GetComponent<Rigidbody>();
         screenWidth = Screen.width;
+        addPhysicsRaycaster();
     }
 
     // Update is called once per frame
     void Update()
     {
         GetTouchInput();
+    }
+
+    void addPhysicsRaycaster()
+    {
+        PhysicsRaycaster physicsRaycaster = FindObjectOfType<PhysicsRaycaster>();
+        if (physicsRaycaster == null)
+        {
+            Camera.main.gameObject.AddComponent<PhysicsRaycaster>();
+        }
     }
 
     private void GetTouchInput()
@@ -36,15 +46,30 @@ public class Ball : MonoBehaviour
             switch (touch.phase)
             {
                 case TouchPhase.Began:
-                    if (touch.position.x > screenWidth / 2)
+
+                    Ray raycast = Camera.main.ScreenPointToRay(touch.position);
+                    RaycastHit raycastHit;
+                    if (Physics.Raycast(raycast, out raycastHit))
                     {
-                        moveBall(touchInputForceDirection);
+                        if (raycastHit.collider.CompareTag("Ball"))
+                        {
+                            Debug.Log("Ball clicked");
+                        }
+
+                        else
+                        {
+                            if (touch.position.x > screenWidth / 2)
+                            {
+                                moveBall(touchInputForceDirection);
+                            }
+
+                            else if (touch.position.x < screenWidth / 2)
+                            {
+                                moveBall(-touchInputForceDirection);
+                            }
+                        }
                     }
 
-                    if (touch.position.x < screenWidth / 2)
-                    {
-                        moveBall(-touchInputForceDirection);
-                    }
                     break;
 
                 case TouchPhase.Ended:
@@ -59,4 +84,14 @@ public class Ball : MonoBehaviour
     {
         ballRigidBody.AddForce(new Vector3(touchInputForceDirection * ballSpeed * Time.deltaTime, 0, 0));
     }
+
+    /*public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.pointerCurrentRaycast.gameObject.name=="Ball")
+        {
+            Debug.Log("Clicked: " + eventData.pointerCurrentRaycast.gameObject.name);
+            ballTouched = true;
+        }
+
+    }*/
 }
