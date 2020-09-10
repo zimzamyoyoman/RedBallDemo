@@ -69,6 +69,11 @@ public class Ball : MonoBehaviour
                         ballRigidBody.velocity = Vector3.zero;
                         ballRigidBody.angularVelocity = Vector3.zero;
                     }
+                    else
+                    {
+                        ballRigidBody.velocity *= 0.9f;
+                        ballRigidBody.angularVelocity *= 0.9f;
+                    }
                     ballTouched = false;
                     break;
             }
