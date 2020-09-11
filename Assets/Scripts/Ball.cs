@@ -18,6 +18,7 @@ public class Ball : MonoBehaviour
 
     // State
     private bool ballTouched = false;
+    private bool gameHasStarted = false;
 
 
     // Start is called before the first frame update
@@ -29,9 +30,35 @@ public class Ball : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        GetTouchInput();
+        if (!gameHasStarted)
+        {
+            StartGame();
+        }
+        if (gameHasStarted)
+        {
+            GetTouchInput();
+            MoveBallAcrossPlatform();
+        }
+    }
+
+    private void MoveBallAcrossPlatform()
+    {
+        ballRigidBody.AddForce(0, 0, 1000 * Time.deltaTime);
+    }
+
+    private void StartGame()
+    {
+        if (Input.touchCount > 0)
+        {
+            touch = Input.GetTouch(0);
+            if (touch.phase == TouchPhase.Began)
+            {
+                gameHasStarted = true;
+            }
+        }
+        
     }
 
     private void GetTouchInput()
