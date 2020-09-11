@@ -7,9 +7,10 @@ using UnityEngine.EventSystems;
 public class Ball : MonoBehaviour
 {
     // Ball Physics Variables
-    [SerializeField] float ballSpeed = 1000f;
-    [SerializeField] float jumpSpeed = 1000f;
-    [SerializeField] float touchInputForceDirection = 10f;
+    [SerializeField] float sidwaysForce = 1000f;
+    [SerializeField] float jumpForce = 1000f;
+    [SerializeField] float horizontalForceDirection = 1f;
+    [SerializeField] float forwardForce = 1000f;
 
     // Cached References
     private Touch touch;
@@ -30,7 +31,7 @@ public class Ball : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         if (!gameHasStarted)
         {
@@ -45,7 +46,7 @@ public class Ball : MonoBehaviour
 
     private void MoveBallAcrossPlatform()
     {
-        ballRigidBody.AddForce(0, 0, 1000 * Time.deltaTime);
+        ballRigidBody.AddForce(0, 0, forwardForce * Time.deltaTime);
     }
 
     private void StartGame()
@@ -79,7 +80,7 @@ public class Ball : MonoBehaviour
                         // Make ball jump if raycast collides with it
                         if (raycastHit.collider.CompareTag("Ball"))
                         {
-                            moveBallVertically(touchInputForceDirection);
+                            moveBallVertically(horizontalForceDirection);
                             // change ball state 
                             ballTouched = true;
                         }
@@ -90,13 +91,13 @@ public class Ball : MonoBehaviour
                             // Move ball right
                             if (touch.position.x > screenWidth / 2)
                             {
-                                moveBallHorizontally(touchInputForceDirection);
+                                moveBallHorizontally(horizontalForceDirection);
                             }
 
                             // Move ball left
                             else if (touch.position.x < screenWidth / 2)
                             {
-                                moveBallHorizontally(-touchInputForceDirection);
+                                moveBallHorizontally(-horizontalForceDirection);
                             }
                         }
                     }
@@ -124,14 +125,14 @@ public class Ball : MonoBehaviour
     }
 
     // Make ball jump
-    private void moveBallVertically(float touchInputForceDirection)
+    private void moveBallVertically(float horizontalForceDirection)
     {
-        ballRigidBody.AddForce(new Vector3(0, touchInputForceDirection * jumpSpeed * Time.deltaTime, 0));
+        ballRigidBody.AddForce(new Vector3(0, horizontalForceDirection * jumpForce * Time.deltaTime, 0));
     }
 
     // Make ball move horizontally
-    private void moveBallHorizontally(float touchInputForceDirection)
+    private void moveBallHorizontally(float horizontalForceDirection)
     {
-        ballRigidBody.AddForce(new Vector3(touchInputForceDirection * ballSpeed * Time.deltaTime, 0, 0));
+        ballRigidBody.AddForce(new Vector3(horizontalForceDirection * sidwaysForce * Time.deltaTime, 0, 0));
     }
 }
